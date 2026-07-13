@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Vérification du pack — École du Nord</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FBFAF5;
+  --ink:#26235C;        /* encre violette / school ink */
+  --ink-soft:#4A4694;
+  --line:#D8E3F2;       /* seyes blue rule */
+  --margin:#E4B4B4;     /* red margin line */
+  --text:#1D1C24;
+  --muted:#6C6B78;
+  --ok:#2E9E6B;
+  --ok-bg:#EAF6F0;
+  --card:#FFFFFF;
+  --shadow:0 1px 2px rgba(38,35,92,.06),0 6px 20px rgba(38,35,92,.07);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:Inter,system-ui,-apple-system,sans-serif;
+  color:var(--text);
+  background-color:var(--paper);
+  /* Seyes-ruled paper: fine horizontal lines + red margin */
+  background-image:
+    linear-gradient(90deg, transparent 26px, var(--margin) 26px, var(--margin) 27px, transparent 27px),
+    repeating-linear-gradient(180deg, transparent 0 27px, var(--line) 27px 28px);
+  background-attachment:fixed;
+  -webkit-font-smoothing:antialiased;
+  line-height:1.5;
+}
+.wrap{max-width:680px;margin:0 auto;padding:0 16px 64px}
+
+/* Header */
+header{
+  position:sticky;top:0;z-index:20;
+  margin:0 -16px 20px;padding:14px 16px calc(14px + env(safe-area-inset-bottom,0));
+  padding-top:calc(14px + env(safe-area-inset-top,0));
+  background:rgba(251,250,245,.86);
+  backdrop-filter:saturate(1.2) blur(10px);
+  border-bottom:1px solid rgba(38,35,92,.10);
+}
+.school{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+.head-row{display:flex;align-items:center;gap:14px;margin-top:6px}
+.classname{font-family:Fraunces,Georgia,serif;font-weight:700;color:var(--ink);
+  font-size:clamp(30px,9vw,44px);line-height:1;margin:0;letter-spacing:-.01em}
+.year{font-size:12.5px;color:var(--muted);margin-top:4px}
+/* progress ring */
+.ring{margin-left:auto;flex:0 0 auto;position:relative;width:58px;height:58px}
+.ring svg{transform:rotate(-90deg)}
+.ring .bg{stroke:var(--line)}
+.ring .fg{stroke:var(--ok);stroke-linecap:round;transition:stroke-dashoffset .5s cubic-bezier(.4,0,.2,1)}
+.ring .pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:var(--ink)}
+
+.intro{font-size:14.5px;color:var(--muted);margin:0 0 22px;max-width:46ch}
+
+/* Pack section */
+.pack{background:var(--card);border-radius:16px;box-shadow:var(--shadow);
+  margin-bottom:18px;overflow:hidden;border:1px solid rgba(38,35,92,.06)}
+.pack-head{display:flex;align-items:baseline;gap:10px;padding:16px 18px 12px}
+.pack-title{font-family:Fraunces,serif;font-weight:600;font-size:19px;color:var(--ink);margin:0}
+.pack-count{font-size:12.5px;color:var(--muted);margin-left:auto;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* Item row */
+.item{display:flex;align-items:center;gap:14px;padding:13px 18px;cursor:pointer;
+  border-top:1px solid #F0EEE8;transition:background .12s;user-select:none}
+.item:active{background:#FAF8F2}
+.box{flex:0 0 auto;width:26px;height:26px;border-radius:8px;border:2px solid var(--ink-soft);
+  display:grid;place-items:center;transition:all .15s}
+.box svg{width:15px;height:15px;stroke:#fff;stroke-width:3.5;fill:none;
+  stroke-dasharray:22;stroke-dashoffset:22;transition:stroke-dashoffset .2s}
+.item.done .box{background:var(--ok);border-color:var(--ok)}
+.item.done .box svg{stroke-dashoffset:0}
+.item-main{flex:1 1 auto;min-width:0}
+.item-name{font-size:15px;font-weight:500;color:var(--text);transition:color .15s}
+.item-code{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:1px}
+.item.done .item-name{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(46,158,107,.6)}
+.qty{flex:0 0 auto;min-width:38px;height:38px;padding:0 10px;border-radius:10px;
+  background:#EEF1FA;color:var(--ink);font-weight:700;font-size:15px;
+  display:grid;place-items:center;font-variant-numeric:tabular-nums}
+.qty small{font-size:10px;font-weight:600;color:var(--ink-soft);display:block;text-align:center;line-height:1;margin-top:-2px}
+
+/* footer / actions */
+.done-banner{display:flex;align-items:center;gap:10px;background:var(--ok-bg);
+  color:var(--ok);border-radius:14px;padding:14px 18px;font-weight:600;font-size:15px;
+  margin-bottom:18px;opacity:0;height:0;padding-top:0;padding-bottom:0;overflow:hidden;
+  transition:all .3s}
+.done-banner.show{opacity:1;height:auto;padding-top:14px;padding-bottom:14px}
+.actions{display:flex;gap:12px;margin-top:8px;align-items:center;flex-wrap:wrap}
+.btn{font-family:inherit;font-size:13.5px;font-weight:600;border-radius:10px;
+  padding:10px 16px;border:1px solid rgba(38,35,92,.18);background:#fff;color:var(--ink);cursor:pointer}
+.btn:active{background:#F4F2EC}
+.note{font-size:12px;color:var(--muted);margin-top:18px;line-height:1.6}
+
+/* class picker (fallback) */
+.picker h1{font-family:Fraunces,serif;color:var(--ink);font-size:26px;margin:28px 0 6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:12px;margin-top:18px}
+.chip{display:block;text-align:center;text-decoration:none;background:var(--card);
+  border:1px solid rgba(38,35,92,.1);border-radius:14px;padding:18px 8px;box-shadow:var(--shadow);
+  font-family:Fraunces,serif;font-weight:600;font-size:22px;color:var(--ink)}
+.chip:active{background:#F4F2EC}
+.chip small{display:block;font-family:Inter;font-weight:500;font-size:11px;color:var(--muted);margin-top:4px}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ===== CONFIG — change the school name here if needed ===== */
+const SCHOOL = "École du Nord";
+const YEAR = "2026 – 2027";
+/* ========================================================= */
+
+const DB = {"classes": ["CP", "CE1", "CE2", "CM1", "CM2", "6em", "5em", "4em", "3em"], "data": {"CP": {"display": "CP", "packs": [{"type": "Cahiers", "title": "PACK CAHIERS CP", "items": [{"code": "OX37799", "name": "Cahier Texte Polypro Spirale 17X22 124 PG 90G SEYES", "qty": 1}, {"code": "OX6765", "name": "Cahier Seyes 17X22 48P 90G Incolore Polypro", "qty": 2}, {"code": "OX2790", "name": "Cahier Travaux Pratiques 17X22 64P 90G Seyes", "qty": 1}, {"code": "OX6760", "name": "Cahier Seyes 24X32 48P 90G Bleu Polypro", "qty": 1}, {"code": "OX0730", "name": "Cahier Seyes 17X22 96P 90G Bleu Polypro", "qty": 1}, {"code": "OX6764", "name": "Cahier Seyes 24X32 96P90G Incolore Polypro", "qty": 1}, {"code": "OX0752", "name": "Cahier Seyes 17X22 60P 90G Bleu Polypro", "qty": 1}]}, {"type": "Accessoires", "title": "PACK ACCESSOIRES CP", "items": [{"code": "MP258500", "name": "White Slate Erasable With Accessories Maped", "qty": 1}, {"code": "MP584610", "name": "Whiteboard Microfibre Cloth Blister Maped", "qty": 1}, {"code": "MP183224", "name": "Colour Pencils Color'peps X 24 Cardboard Box Maped", "qty": 1}, {"code": "MP845020", "name": "Felt Tips Pens Color'peps Long Life X Life X12 MAPED", "qty": 1}, {"code": "MP464270", "name": "Scissors Pulse 13CM Maped", "qty": 1}, {"code": "STD30", "name": "Eraser Mars Staedtler", "qty": 1}, {"code": "MP146108", "name": "Ruler 20cm Classic Bag Maped", "qty": 1}, {"code": "MONMT-G", "name": "Ballpen Megatop Green Montex", "qty": 1}, {"code": "MONMT-BU", "name": "Ballpen Megatop Blue Montex", "qty": 5}, {"code": "HE44130", "name": "Sharpener Oxford Double Hole Barrel 44130", "qty": 1}, {"code": "UHU65", "name": "Paper Glue Stick 21g UHU 65", "qty": 12}, {"code": "GIO413401", "name": "Marqueur Effacable Blue Giotto Moyenne", "qty": 10}, {"code": "MP850021", "name": "Pencil Graphite HB Maped", "qty": 10}, {"code": "AP11277", "name": "Apli Pochette 20 Etiquette Scolaire", "qty": 1}, {"code": "MP833800", "name": "Whiteboard Pencil Peps Wood Fsc 100% 4 Crayons + Taille Crayon Bte Carton Maped", "qty": 1}]}, {"type": "Classeur", "title": "PACK CLASSEUR CP", "items": [{"code": "PADPA4", "name": "SKETCH PAD A4 PICASSO", "qty": 1}, {"code": "EX55903E", "name": "Chemise A Elastique 3 Rabats Vert Exacompta", "qty": 1}, {"code": "EX55902E", "name": "Chemise a Elastique 3 Rabats Bleue", "qty": 1}, {"code": "EX55909E", "name": "Chemise a Elastique 3 Rabats Jaune", "qty": 1}]}]}, "CE1": {"display": "CE1", "packs": [{"type": "Cahiers", "title": "PACK CAHIERS CE1", "items": [{"code": "OX37799", "name": "Cahier Texte Polypro Spirale 17X22 124 PG 90G SEYES", "qty": 1}, {"code": "OX6765", "name": "Cahier Seyes 17X22 48P 90G Incolore Polypro", "qty": 2}, {"code": "OX2790", "name": "Cahier Travaux Pratiques 17X22 64P 90G Seyes", "qty": 1}, {"code": "OX491", "name": "Cahier Seyes 17X22 48P 90G Bleu Polypro", "qty": 1}, {"code": "OX0730", "name": "Cahier Seyes 17X22 96P 90G Bleu Polypro", "qty": 1}, {"code": "OX6766", "name": "Cahier 17x22 Seyes Polypro", "qty": 2}, {"code": "OX6764", "name": "Cahier Seyes 24X32 96P90G Incolore Polypro", "qty": 3}, {"code": "OX101235", "name": "Cahier Seyes 17X22 60P 90G Jaune Polypro", "qty": 5}]}, {"type": "Accessoires", "title": "PACK ACCESSOIRES CE1", "items": [{"code": "MP258500", "name": "White Slate Erasable With Accessories Maped", "qty": 1}, {"code": "MP183224", "name": "Colour Pencils Color'peps X 24 Cardboard Box Maped", "qty": 1}, {"code": "MP845020", "name": "Felt Tips Pens Color'peps Long Life X Life X12 MAPED", "qty": 1}, {"code": "MP464270", "name": "Scissors Pulse 13CM Maped", "qty": 1}, {"code": "UHU65", "name": "Paper Glue Stick 21g UHU 65", "qty": 10}, {"code": "FC555951", "name": "Faber Castel Whiteboard Marker Blue", "qty": 10}, {"code": "HEYS2", "name": "Eraser Large Sleeved Oxford Helix X31843", "qty": 5}, {"code": "MP850021", "name": "Pencil Graphite HB Maped", "qty": 10}, {"code": "MP242621", "name": "Geometric Square 60/21cm MAPED 242621", "qty": 1}, {"code": "MP146108", "name": "Ruler 20cm Classic Bag MAPED 146108", "qty": 1}, {"code": "HE44130", "name": "Sharpener Oxford Double Hole Barrel", "qty": 2}, {"code": "EGBSG1-BU", "name": "Ball Pen Needle Tip 0.7mm Blue Artline", "qty": 5}, {"code": "MONMT-R", "name": "Ballpen Megatop Red Montex", "qty": 3}, {"code": "MONMT-G", "name": "Ballpen Megatop Green Montex", "qty": 3}, {"code": "MONMT-BK", "name": "Ballpen Megatop Black Montex", "qty": 3}, {"code": "MP742534", "name": "Highlighter Yellow Maped", "qty": 1}, {"code": "MP742535", "name": "Highlighter Orange Maped", "qty": 1}, {"code": "MP742533", "name": "Highlighter Green Maped", "qty": 1}, {"code": "MP181611", "name": "Compass Plastic Holder Kid'z 360 Display Maped", "qty": 1}]}, {"type": "Classeur", "title": "PACK CLASSEUR CE1", "items": [{"code": "EX8560E", "name": "Porte Vues PP A4 60 poc - 120 vues Exacompta 8560E", "qty": 3}, {"code": "EX55902E", "name": "Chemise a Elastique 3 Rabats Bleue Exacompta", "qty": 1}, {"code": "EX55903E", "name": "Chemise A Elastique 3 Rabats Vert Exacompta", "qty": 1}, {"code": "EX55909E", "name": "Chemise a Elastique 3 Rabats Jaune Exacompta", "qty": 1}, {"code": "EX55905E", "name": "Chemise a Elastique 3Rabats Rouge Exacompta", "qty": 1}]}]}, "CE2": {"display": "CE2", "packs": [{"type": "Cahiers", "title": "PACK CAHIERS CE2", "items": [{"code": "OX0730", "name": "Cahier Seyes 17X22 96P 90G Bleu Polypro", "qty": 1}, {"code": "OX6764", "name": "Cahier Seyes 24X32 96P90G Incolore Polypro", "qty": 3}, {"code": "OX6765", "name": "Cahier Seyes 17X22 48P 90G Incolore Polypro", "qty": 12}, {"code": "OX2795", "name": "Cahier Travaux Pratiques 24X32 96P 90G Seyes/Uni Polypro", "qty": 1}, {"code": "OX6760", "name": "Cahier Seyes 24X32 48P 90G Bleu Polypro C", "qty": 1}]}, {"type": "Accessoires", "title": "PACK ACCESSOIRES CE2", "items": [{"code": "MP258500", "name": "White Slate Erasable With Accessories Maped", "qty": 1}, {"code": "MP183212", "name": "Colour Pencils Color'peps X 12 Cardboard Box Maped", "qty": 1}, {"code": "MP845020", "name": "Felt Tips Pens Color'peps Long Life X Life X12 Maped", "qty": 1}, {"code": "MP464270", "name": "Scissors Pulse 13CM Maped", "qty": 1}, {"code": "UHU65", "name": "Paper Glue Stick 21g UHU 65", "qty": 10}, {"code": "MP192511", "name": "Compass Lead Stop & Safe Box Maped", "qty": 1}, {"code": "FC555951", "name": "Faber Castel Whiteboard Marker Blue", "qty": 15}, {"code": "MP850021", "name": "Pencil Graphite HB Maped", "qty": 5}, {"code": "MP242621", "name": "Geometric Square 60/21cm MAPED 242621", "qty": 1}, {"code": "HEYS2", "name": "Eraser Large Sleeved Oxford Helix X31843", "qty": 2}, {"code": "MP146108", "name": "Ruler 20cm Classic Bag MAPED 146108", "qty": 1}, {"code": "MONMT-BU", "name": "Ballpen Megatop Blue MONTEX", "qty": 2}, {"code": "MONMT-BK", "name": "Ballpen Megatop Black Montex", "qty": 2}, {"code": "MONMT-R", "name": "Ballpen Megatop Red Montex", "qty": 2}, {"code": "MONMT-G", "name": "Ballpen Megatop Green Montex", "qty": 2}, {"code": "MP742533", "name": "Highlighter Green Maped", "qty": 1}, {"code": "MP742534", "name": "Highlighter Yellow Maped", "qty": 1}, {"code": "HE44130", "name": "Sharpener Oxford Double Hole Barrel", "qty": 1}]}, {"type": "Classeur", "title": "PACK CLASSEUR CE2", "items": [{"code": "OX90", "name": "Feuille Mobile Seyes Perforees A4 100 pages 90G", "qty": 1}, {"code": "EX8560E", "name": "Porte Vues PP A4 60 poc - 120 vues Exacompta 8560E", "qty": 2}, {"code": "EX55903E", "name": "Chemise A Elastique 3 Rabats Vert Exacompta", "qty": 1}, {"code": "EX55918E", "name": "Chemise a Elastique 3Rabats Mauve Exacompta", "qty": 1}, {"code": "EX55902E", "name": "Chemise a Elastique 3 Rabats Bleue Exacompta", "qty": 1}]}]}, "CM1": {"display": "CM1", "packs": [{"type": "Cahiers", "title": "PACK CAHIERS CM1", "items": [{"code": "OX6766", "name": "Cahier 17x22 Seyes Polypro 96pgs 90Gsm Incolore Ref: 6766- 2104", "qty": 1}, {"code": "OX8147", "name": "Cahier Seyes 24X32 48P Incolore 90G Polypro", "qty": 11}, {"code": "OX21691", "name": "Cahier Seyes 24X32 96P 90G Bleu Polypro Ref 3501-02146", "qty": 1}, {"code": "OX6760", "name": "Cahier Seyes 24X32 48P 90G Bleu Polypro C", "qty": 2}]}, {"type": "Accessoires", "title": "PACK ACCESSOIRES CM1", "items": [{"code": "MP258500", "name": "White Slate Erasable With Accessories Maped", "qty": 1}, {"code": "MP183212", "name": "Colour Pencils Color'peps X 12 Cardboard Box Maped", "qty": 1}, {"code": "MP845020", "name": "Felt Tips Pens Color'peps Long Life X Life X12 Maped", "qty": 1}, {"code": "MP464270", "name": "Scissors Pulse 13CM Maped", "qty": 1}, {"code": "UHU65", "name": "Paper Glue Stick 21g UHU 65", "qty": 10}, {"code": "MP119410", "name": "Compass Study MAPED 119410", "qty": 1}, {"code": "GIO413201", "name": "Marqueur Blue Pointe Fine Ogive Giotto Robercolor", "qty": 10}, {"code": "MP850021", "name": "Pencil Graphite HB Maped", "qty": 3}, {"code": "MP242621", "name": "Geometric Square 60/21cm MAPED 242621", "qty": 1}, {"code": "HEYS2", "name": "Eraser Large Sleeved Oxford Helix X31843", "qty": 2}, {"code": "MP146119", "name": "Ruler 30cm Flat Classic Bag MAPED 146119", "qty": 1}, {"code": "EGBSG1-BU", "name": "Ball Pen Needle Tip 0.7mm Blue Artline", "qty": 5}, {"code": "MONMT-R", "name": "Ballpen Megatop Red Montex", "qty": 2}, {"code": "MONMT-BK", "name": "Ballpen Megatop Black Montex", "qty": 1}, {"code": "BIC341862", "name": "Ball Pen Orange Fine Green BIC 341862", "qty": 5}, {"code": "MP742535", "name": "Highlighter Orange Maped", "qty": 1}, {"code": "MP742533", "name": "Highlighter Green Maped", "qty": 1}, {"code": "MP742534", "name": "Highlighter Yellow Maped", "qty": 1}, {"code": "HE44130", "name": "Sharpener Oxford Double Hole Barrel", "qty": 1}]}, {"type": "Classeur", "title": "PACK CLASSEUR CM1", "items": [{"code": "EX8560E", "name": "Porte Vues PP A4 60 poc - 120 vues Exacompta", "qty": 6}, {"code": "EX55909E", "name": "Chemise A Elastique 3 Rabats Jaune Exacompta", "qty": 1}, {"code": "EX55905E", "name": "Chemise a Elastique 3 Rabats Rouge Exacompta", "qty": 1}, {"code": "EX55902E", "name": "Chemise a Elastique 3 Rabats Bleue Exacompta", "qty": 1}, {"code": "VIQ198805", "name": "Trieur Extensible 12 Compartiments A4 Noir Polypropylene -  Viquel", "qty": 1}, {"code": "OX90", "name": "Feuille Mobile Seyes Perforees A4 100 pages 90G", "qty": 1}, {"code": "PATRA4-10", "name": "TRACING PAPER PACK OF 10", "qty": 1}, {"code": "OX727", "name": "Feuille Mobile Uni Dessin Perforees A4 50P 120G", "qty": 1}]}]}, "CM2": {"display": "CM2", "packs": [{"type": "Cahiers", "title": "PACK CAHIERS CM2", "items": [{"code": "OX2790", "name": "Cahier Travaux Pratiques 17X22 64P 90G Seyes/Uni Polypro", "qty": 1}, {"code": "OX0730", "name": "Cahier Seyes 17X22 96P 90G Bleu Polypro", "qty": 1}, {"code": "OX9670", "name": "Cahier A4 96P 90G Seyes Incolore Polypro", "qty": 2}, {"code": "OX8147", "name": "Cahier Seyes 24X32 48P Incolore 90G Polypro", "qty": 2}, {"code": "OX6760", "name": "Cahier Seyes 24X32 48P 90G Bleu Polypro C", "qty": 1}, {"code": "OX21691", "name": "Cahier Seyes 24X32 96P 90G Bleu Polypro Ref 3501-02146", "qty": 1}, {"code": "OX6764", "name": "Cahier Seyes 24X32 96P90G Incolore Polypro", "qty": 4}]}, {"type": "Accessoires", "title": "PACK ACCESSOIRES CM2", "items": [{"code": "MP258500", "name": "White Slate Erasable With Accessories Maped", "qty": 1}, {"code": "MP183212", "name": "Colour Pencils Color'peps X 12 Cardboard Box Maped", "qty": 1}, {"code": "MP845020", "name": "Felt Tips Pens Color'peps Long Life X Life X12 Maped", "qty": 1}, {"code": "MP464270", "name": "Scissors Pulse 13CM Maped", "qty": 1}, {"code": "UHU65", "name": "Paper Glue Stick 21g UHU 65", "qty": 5}, {"code": "MP192611", "name": "Compass Stop & Safe Maped", "qty": 1}, {"code": "GIO413201", "name": "Marqueur Blue Pointe Fine Ogive Giotto Robercolor", "qty": 5}, {"code": "MP850021", "name": "Pencil Graphite HB Maped", "qty": 3}, {"code": "HEYS2", "name": "Eraser Large Sleeved Oxford Helix X31843", "qty": 1}, {"code": "MP146119", "name": "Ruler 30cm Flat Classic Bag MAPED 146119", "qty": 1}, {"code": "MONMT-BK", "name": "Ballpen Megatop Black Montex", "qty": 3}, {"code": "MONMT-BU", "name": "Ballpen Megatop Blue Montex", "qty": 4}, {"code": "MONMT-R", "name": "Ballpen Megatop Red Montex", "qty": 1}, {"code": "MONMT-G", "name": "Ballpen Megatop Green Montex", "qty": 3}, {"code": "MP742535", "name": "Highlighter Orange Maped", "qty": 1}, {"code": "MP742533", "name": "Highlighter Green Maped", "qty": 1}, {"code": "MP742534", "name": "Highlighter Yellow Maped", "qty": 1}, {"code": "HE44130", "name": "Sharpener Oxford Double Hole Barrel", "qty": 1}, {"code": "MP242621", "name": "Geometric Square 60/21cm MAPED 242621", "qty": 1}]}, {"type": "Classeur", "title": "PACK CLASSEUR CM2", "items": [{"code": "EX51370E", "name": "Classeur Rigide 4An PP A4 Exacompta", "qty": 1}, {"code": "EX8560E", "name": "Porte Vues PP A4 60 poc - 120 vues Exacompta", "qty": 2}, {"code": "EX8520E", "name": "Porte Vues PP A4 40 Vues - 20 Poc", "qty": 1}, {"code": "EX55902E", "name": "Chemise a Elastique 3 Rabats Bleue Exacompta", "qty": 2}, {"code": "OX90", "name": "Feuille Mobile Seyes Perforees A4 100 pages 90G", "qty": 1}, {"code": "PAINPP12", "name": "Index Divider PP A4 12 Plain", "qty": 1}, {"code": "OX4964", "name": "Pochettes Plastique Perforées A4 Transparent x 50", "qty": 1}, {"code": "PADPA4", "name": "SKETCH PAD A4 PICASSO", "qty": 1}, {"code": "VIQ198805", "name": "Trieur Extensible 12 Compartiments A4 Noir Polypropylene -  Viquel", "qty": 1}]}]}, "6em": {"display": "6ème", "packs": [{"type": "Cahiers", "title": "PACK CAHIERS 6em", "items": [{"code": "OX6764", "name": "Cahier Seyes 24X32 96P90G Incolore Polypro", "qty": 5}, {"code": "OX2788", "name": "Cahier Uni Dessins 24X32 48P 120G Polypro Conquerant", "qty": 1}, {"code": "OX9672", "name": "Cahier Q5X5 24X32 96P 90G Incolore Polypro Conquerant", "qty": 2}]}, {"type": "Accessoires", "title": "PACK ACCESSOIRES 6em", "items": [{"code": "MP183212", "name": "Colour Pencils Color'peps X 12 Cardboard Box Maped", "qty": 1}, {"code": "MP845020", "name": "Felt Tips Pens Color'peps Long Life X Life X12 Maped", "qty": 1}, {"code": "WCGU", "name": "Guitar Watercolor", "qty": 1}, {"code": "UHU65", "name": "Paper Glue Stick 21g UHU 65", "qty": 6}, {"code": "FC220140", "name": "WHITE GLUE 40GMS REF FC220140", "qty": 1}, {"code": "MP850021", "name": "Pencil Graphite HB Maped", "qty": 2}, {"code": "FC1111-06", "name": "DRAWING PENCIL SET OF 6 REF FC1111-06", "qty": 1}, {"code": "MP242621", "name": "Geometric Square 60/21cm MAPED 242621", "qty": 1}, {"code": "HEYS2", "name": "Eraser Large Sleeved Oxford Helix X31843", "qty": 2}, {"code": "CZRDB9", "name": "Palette Oval 9/10 Wells", "qty": 1}, {"code": "MMBR26", "name": "MM Gallery Series Brush Set Watercolour 7pc", "qty": 1}, {"code": "MP242180", "name": "Geometric Protractor 180/12cm MAPED 242180", "qty": 1}, {"code": "MP146119", "name": "Ruler 30cm Flat Classic Bag MAPED 146119", "qty": 1}, {"code": "MONMT-BU", "name": "Ballpen Megatop Blue Montex", "qty": 4}, {"code": "MONMT-BK", "name": "Ballpen Megatop Black Montex", "qty": 2}, {"code": "MONMT-R", "name": "Ballpen Megatop Red Montex", "qty": 2}, {"code": "MONMT-G", "name": "Ballpen Megatop Green Montex", "qty": 2}, {"code": "MP742536", "name": "Highlighter Pink Maped", "qty": 1}, {"code": "MP742534", "name": "Highlighter Yellow Maped", "qty": 1}, {"code": "MP742533", "name": "Highlighter Green Maped", "qty": 1}, {"code": "MP036910", "name": "Compass Open Holder Blister MAPED 036910", "qty": 1}, {"code": "HE44130", "name": "Sharpener Oxford Double Hole Barrel", "qty": 1}, {"code": "MP496110", "name": "Scissors Advanced Anneaux Ergonomique Green 17CM Maped", "qty": 1}, {"code": "MP742535", "name": "Highlighter Orange Maped", "qty": 1}]}, {"type": "Classeur", "title": "PACK CLASSEUR 6em", "items": [{"code": "EX51370E", "name": "Classeur Rigide 4An PP A4 Exacompta", "qty": 1}, {"code": "OX90", "name": "Feuille Mobile Seyes Perforees A4 100 pages 90G", "qty": 7}, {"code": "FOS-W0406B", "name": "Boite de Classement A4 W0406B FOSKA", "qty": 1}, {"code": "EX55902E", "name": "Chemise a Elastique 3 Rabats Bleue Exacompta", "qty": 1}, {"code": "OX087", "name": "Copies Doubles Q5X5 Perforees 200 Pages A4 70G", "qty": 1}, {"code": "OX3868", "name": "Pochettes Plastique Perforées A4 Transparent x 100", "qty": 1}, {"code": "PAINPP6", "name": "Index Divider PP A4 6 Plain", "qty": 1}, {"code": "EX8520E", "name": "Porte Vues PP A4 40 Vues - 20 Poc", "qty": 2}]}]}, "5em": {"display": "5ème", "packs": [{"type": "Cahiers", "title": "PACK CAHIERS 5em", "items": [{"code": "OX2788", "name": "Cahier Uni Dessins 24X32 48P 120G Polypro Conquerant", "qty": 1}, {"code": "OX6764", "name": "Cahier Seyes 24X32 96P90G Incolore Polypro", "qty": 4}, {"code": "OX9672", "name": "Cahier Q5X5 24X32 96P 90G Incolore Polypro Conquerant Ref 9672-02142", "qty": 2}]}, {"type": "Accessoires", "title": "PACK ACCESSOIRES 5em", "items": [{"code": "MP183212", "name": "Colour Pencils Color'peps X 12 Cardboard Box Maped", "qty": 1}, {"code": "MP845020", "name": "Felt Tips Pens Color'peps Long Life X Life X12 Maped", "qty": 1}, {"code": "WCGU", "name": "Guitar Watercolor", "qty": 1}, {"code": "UHU65", "name": "Paper Glue Stick 21g UHU 65", "qty": 6}, {"code": "FC220140", "name": "WHITE GLUE 40GMS REF FC220140", "qty": 1}, {"code": "MP850021", "name": "Pencil Graphite HB Maped", "qty": 2}, {"code": "MP242621", "name": "Geometric Square 60/21cm MAPED 242621", "qty": 1}, {"code": "HEYS2", "name": "Eraser Large Sleeved Oxford Helix X31843", "qty": 2}, {"code": "MMBR26", "name": "MM Gallery Series Brush Set Watercolour 7pc", "qty": 1}, {"code": "MP242180", "name": "Geometric Protractor 180/12cm MAPED 242180", "qty": 1}, {"code": "MP146119", "name": "Ruler 30cm Flat Classic Bag MAPED 146119", "qty": 1}, {"code": "MONMT-BU", "name": "Ballpen Megatop Blue Montex", "qty": 4}, {"code": "MONMT-BK", "name": "Ballpen Megatop Black Montex", "qty": 2}, {"code": "MONMT-R", "name": "Ballpen Megatop Red Montex", "qty": 2}, {"code": "MONMT-G", "name": "Ballpen Megatop Green Montex", "qty": 2}, {"code": "MP742534", "name": "Highlighter Yellow Maped", "qty": 1}, {"code": "MP742533", "name": "Highlighter Green Maped", "qty": 1}, {"code": "MP742535", "name": "Highlighter Orange Maped", "qty": 1}, {"code": "MP036910", "name": "Compass Open Holder Blister MAPED 036910", "qty": 1}, {"code": "HE44130", "name": "Sharpener Oxford Double Hole Barrel", "qty": 1}, {"code": "MP496110", "name": "Scissors Advanced Anneaux Ergonomique Green 17CM Maped", "qty": 1}, {"code": "MP742536", "name": "Highlighter Pink Maped", "qty": 1}]}, {"type": "Classeur", "title": "PACK CLASSEUR 5em", "items": [{"code": "EX51370E", "name": "Classeur Rigide 4An PP A4 Exacompta", "qty": 1}, {"code": "EX51469E", "name": "Classeur Souple Exacompta", "qty": 2}, {"code": "OX90", "name": "Feuille Mobile Seyes Perforees A4 100 pages 90G", "qty": 8}, {"code": "FOS-W0406B", "name": "Boite de Classement A4 W0406B FOSKA", "qty": 1}, {"code": "OX087", "name": "Copies Doubles Q5X5 Perforees 200 Pages A4 70G", "qty": 1}, {"code": "EX55902E", "name": "Chemise a Elastique 3 Rabats Bleue Exacompta", "qty": 1}, {"code": "PAINPP6", "name": "Index Divider PP A4 6 Plain", "qty": 1}, {"code": "OX3868", "name": "Pochettes Plastique Perforées A4 Transparent x 100", "qty": 1}, {"code": "OX085", "name": "Copies Doubles Seyes Perforees 200 Pages A4", "qty": 1}, {"code": "EX55903E", "name": "Chemise A Elastique 3 Rabats PP 24X32 Vert Exacompta", "qty": 1}, {"code": "EX8520E", "name": "Porte Vues PP A4 40 Vues - 20 Poc", "qty": 1}]}]}, "4em": {"display": "4ème", "packs": [{"type": "Cahiers", "title": "PACK CAHIERS 4em", "items": [{"code": "OX2788", "name": "Cahier Uni Dessins 24X32 48P 120G Polypro Conquerant", "qty": 1}, {"code": "OX6764", "name": "Cahier Seyes 24X32 96P90G Incolore Polypro", "qty": 3}, {"code": "OX9672", "name": "Cahier Q5X5 24X32 96P 90G Incolore Polypro Conquerant Ref 9672-02142", "qty": 2}]}, {"type": "Accessoires", "title": "PACK ACCESSOIRES 4em", "items": [{"code": "MP183212", "name": "Colour Pencils Color'peps X 12 Cardboard Box Maped", "qty": 1}, {"code": "MP845020", "name": "Felt Tips Pens Color'peps Long Life X Life X12 Maped", "qty": 1}, {"code": "WCGU", "name": "Guitar Watercolor", "qty": 1}, {"code": "MP496110", "name": "Scissors Advanced Anneaux Ergonomique Green 17CM Maped", "qty": 1}, {"code": "UHU65", "name": "Paper Glue Stick 21g UHU 65", "qty": 6}, {"code": "FC220140", "name": "WHITE GLUE 40GMS REF FC220140", "qty": 1}, {"code": "MP850021", "name": "Pencil Graphite HB Maped", "qty": 2}, {"code": "MP242621", "name": "Geometric Square 60/21cm MAPED 242621", "qty": 1}, {"code": "HEYS2", "name": "Eraser Large Sleeved Oxford Helix X31843", "qty": 2}, {"code": "FC553999", "name": "FABER CASTEL PERMANENT MARKER BLACK", "qty": 1}, {"code": "FC553921", "name": "FABER CASTEL PERMANENT MARKER RED", "qty": 1}, {"code": "MMBR26", "name": "MM Gallery Series Brush Set Watercolour 7pc", "qty": 1}, {"code": "MP242180", "name": "Geometric Protractor 180/12cm MAPED 242180", "qty": 1}, {"code": "MP146119", "name": "Ruler 30cm Flat Classic Bag MAPED 146119", "qty": 1}, {"code": "MONMT-BU", "name": "Ballpen Megatop Blue Montex", "qty": 4}, {"code": "MONMT-BK", "name": "Ballpen Megatop Black Montex", "qty": 2}, {"code": "MONMT-R", "name": "Ballpen Megatop Red Montex", "qty": 2}, {"code": "MONMT-G", "name": "Ballpen Megatop Green Montex", "qty": 2}, {"code": "MP742534", "name": "Highlighter Yellow Maped", "qty": 1}, {"code": "MP742533", "name": "Highlighter Green Maped", "qty": 1}, {"code": "MP742536", "name": "Highlighter Pink Maped", "qty": 1}, {"code": "MP742535", "name": "Highlighter Orange Maped", "qty": 1}, {"code": "MP036910", "name": "Compass Open Holder Blister MAPED 036910", "qty": 1}, {"code": "EK200-BK", "name": "Writing Pen 0.4mm Black Artline Ref EK200", "qty": 1}, {"code": "HE44130", "name": "Sharpener Oxford Double Hole Barrel", "qty": 1}]}, {"type": "Classeur", "title": "PACK CLASSEUR 4em", "items": [{"code": "EX51370E", "name": "Classeur Rigide 4An PP A4 Exacompta", "qty": 1}, {"code": "EX51469E", "name": "Classeur Souple Exacompta", "qty": 2}, {"code": "FOS-W0406B", "name": "Boite de Classement A4 W0406B FOSKA", "qty": 1}, {"code": "OX90", "name": "Feuille Mobile Seyes Perforees A4 100 pages 90G", "qty": 11}, {"code": "OX087", "name": "Copies Doubles Q5X5 Perforees 200 Pages A4 70G", "qty": 1}, {"code": "OX4964", "name": "Pochettes Plastique Perforées A4 Transparent x 50", "qty": 1}, {"code": "EX85100", "name": "Porte Vues A4 200 Vues Exacompta", "qty": 1}, {"code": "PAINPP6", "name": "Index Divider PP A4 6 Plain", "qty": 1}, {"code": "OX085", "name": "Copies Doubles Seyes Perforees 200 Pages A4", "qty": 1}, {"code": "EX55902E", "name": "Chemise a Elastique 3 Rabats Bleue Exacompta", "qty": 1}, {"code": "EX8520E", "name": "Porte Vues PP A4 40 Vues - 20 Poc", "qty": 2}]}]}, "3em": {"display": "3ème", "packs": [{"type": "Cahiers", "title": "PACK CAHIERS 3em", "items": [{"code": "OX765", "name": "Cahier Seyes 24X32 192P 70G Incolore Polypro Conquerant", "qty": 1}, {"code": "OX3118", "name": "Carnet Spirale Integrale Q5x5 180P 70G Conquerant", "qty": 1}, {"code": "OX9672", "name": "Cahier Q5X5 24X32 96P 90G Incolore Polypro Conquerant Ref 9672-02142", "qty": 2}, {"code": "OX2788", "name": "Cahier Uni Dessins 24X32 48P 120G Polypro Conquerant", "qty": 1}, {"code": "OX6764", "name": "Cahier Seyes 24X32 96P90G Incolore Polypro", "qty": 1}]}, {"type": "Accessoires", "title": "PACK ACCESSOIRES 3em", "items": [{"code": "MP183212", "name": "Colour Pencils Color'peps X 12 Cardboard Box Maped", "qty": 1}, {"code": "MP496110", "name": "Scissors Advanced Anneaux Ergonomique Green 17CM Maped", "qty": 1}, {"code": "UHU65", "name": "Paper Glue Stick 21g UHU 65", "qty": 6}, {"code": "MP850021", "name": "Pencil Graphite HB Maped", "qty": 2}, {"code": "HEYS2", "name": "Eraser Large Sleeved Oxford Helix X31843", "qty": 2}, {"code": "MP146119", "name": "Ruler 30cm Flat Classic Bag MAPED 146119", "qty": 1}, {"code": "MONMT-BU", "name": "Ballpen Megatop Blue Montex", "qty": 4}, {"code": "MONMT-BK", "name": "Ballpen Megatop Black Montex", "qty": 2}, {"code": "MONMT-R", "name": "Ballpen Megatop Red Montex", "qty": 2}, {"code": "MONMT-G", "name": "Ballpen Megatop Green Montex", "qty": 2}, {"code": "MP742534", "name": "Highlighter Yellow Maped", "qty": 1}, {"code": "MP742533", "name": "Highlighter Green Maped", "qty": 1}, {"code": "MP742536", "name": "Highlighter Pink Maped", "qty": 1}, {"code": "MP742535", "name": "Highlighter Orange Maped", "qty": 1}, {"code": "HE44130", "name": "Sharpener Oxford Double Hole Barrel", "qty": 1}, {"code": "MP242621", "name": "Geometric Square 60/21cm MAPED 242621", "qty": 1}, {"code": "MP242180", "name": "Geometric Protractor 180/12cm MAPED 242180", "qty": 1}, {"code": "MP036910", "name": "Compass Open Holder Blister MAPED 036910", "qty": 1}, {"code": "WCGU", "name": "Guitar Watercolor", "qty": 1}, {"code": "FC220140", "name": "WHITE GLUE 40GMS REF FC220140", "qty": 1}, {"code": "FC1111-06", "name": "DRAWING PENCIL SET OF 6", "qty": 1}, {"code": "FC553999", "name": "FABER CASTEL PERMANENT MARKER BLACK", "qty": 1}, {"code": "FC553921", "name": "FABER CASTEL PERMANENT MARKER RED", "qty": 1}, {"code": "MMBR26", "name": "MM Gallery Series Brush Set Watercolour 7pc", "qty": 1}, {"code": "EK200-BK", "name": "Writing Pen 0.4mm Black Artline Ref EK200", "qty": 1}]}, {"type": "Classeur", "title": "PACK CLASSEUR 3em", "items": [{"code": "EX85100", "name": "Porte Vues A4 200 Vues Pvc Exacompta", "qty": 1}, {"code": "OX90", "name": "Feuille Mobile Seyes Perforees A4 100 pages 90G Conquerant", "qty": 10}, {"code": "EX51370E", "name": "Classeur Rigide 4An PP A4 Exacompta", "qty": 1}, {"code": "OX085", "name": "Copies Doubles Seyes Perforees 200 Pages A4 70G", "qty": 2}, {"code": "OX3868", "name": "Pochettes Plastique Perforées A4 Transparent x 100", "qty": 1}, {"code": "PAINPP6", "name": "Index Divider PP A4 6 Plain", "qty": 1}, {"code": "EX55903E", "name": "Chemise A Elastique 3 Rabats Vert Exacompta", "qty": 1}, {"code": "FOS-W0406B", "name": "Boite de Classement A4", "qty": 1}, {"code": "OX087", "name": "Copies Doubles Q5X5 Perforees 200 Pages", "qty": 1}, {"code": "CAPU30X40", "name": "Canvas Uni Picasso 30x40 380GSM", "qty": 1}, {"code": "EX51469E", "name": "Classeur Souple Exacompta 4an", "qty": 1}, {"code": "EX8520E", "name": "Porte Vues PP A4 40 Vues - 20 Poc", "qty": 1}]}]}}};
+
+const params = new URLSearchParams(location.search);
+const cls = params.get('class');
+const app = document.getElementById('app');
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+function render(){
+  if(!cls || !DB.data[cls]){ renderPicker(); return; }
+  const c = DB.data[cls];
+  const key = 'edn_pack_'+cls;
+  let state = {};
+  try{ state = JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
+
+  const total = c.packs.reduce((n,p)=>n+p.items.length,0);
+
+  let html = `<header>
+    <div class="school">${esc(SCHOOL)}</div>
+    <div class="head-row">
+      <div>
+        <h1 class="classname">${esc(c.display)}</h1>
+        <div class="year">Liste des fournitures · ${esc(YEAR)}</div>
+      </div>
+      <div class="ring" id="ring">
+        <svg width="58" height="58"><circle class="bg" cx="29" cy="29" r="25" fill="none" stroke-width="6"/>
+        <circle class="fg" id="ringfg" cx="29" cy="29" r="25" fill="none" stroke-width="6"
+          stroke-dasharray="${2*Math.PI*25}" stroke-dashoffset="${2*Math.PI*25}"/></svg>
+        <div class="pct" id="pct">0%</div>
+      </div>
+    </div>
+  </header>
+  <p class="intro">Cochez chaque article au fur et à mesure que vous le retrouvez dans le pack de votre enfant.</p>
+  <div class="done-banner" id="banner">✓ &nbsp;Pack complet — tous les articles sont présents.</div>`;
+
+  c.packs.forEach((p,pi)=>{
+    html += `<section class="pack"><div class="pack-head">
+      <h2 class="pack-title">${esc(p.title||p.type)}</h2>
+      <span class="pack-count">${p.items.length} article${p.items.length>1?'s':''}</span></div>`;
+    p.items.forEach((it,ii)=>{
+      const id = pi+'-'+ii;
+      const done = state[id] ? ' done':'';
+      const qtyNum = (it.qty===''||it.qty==null)?'':it.qty;
+      html += `<div class="item${done}" data-id="${id}">
+        <div class="box"><svg viewBox="0 0 18 18"><polyline points="3,9 7,13 15,4"/></svg></div>
+        <div class="item-main">
+          <div class="item-name">${esc(it.name)}</div>
+          <div class="item-code">${esc(it.code)}</div>
+        </div>
+        <div class="qty">${esc(qtyNum)}<small>qté</small></div>
+      </div>`;
+    });
+    html += `</section>`;
+  });
+
+  html += `<div class="actions">
+      <button class="btn" id="reset">Tout décocher</button>
+      <a class="btn" href="?" style="text-decoration:none">← Autre classe</a>
+    </div>
+    <p class="note">Vos coches sont enregistrées sur cet appareil uniquement.
+    Article manquant ou abîmé ? Écrivez-nous à <a href="mailto:marentree@hassamal.com" style="color:var(--ink-soft);font-weight:600">marentree@hassamal.com</a>.</p>`;
+
+  app.innerHTML = html;
+
+  const CIRC = 2*Math.PI*25;
+  function update(){
+    const checked = Object.values(state).filter(Boolean).length;
+    const pct = total? Math.round(checked/total*100):0;
+    document.getElementById('pct').textContent = pct+'%';
+    document.getElementById('ringfg').style.strokeDashoffset = CIRC*(1-pct/100);
+    document.getElementById('banner').classList.toggle('show', checked===total && total>0);
+  }
+  app.querySelectorAll('.item').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const id = el.dataset.id;
+      state[id] = !state[id];
+      el.classList.toggle('done', !!state[id]);
+      localStorage.setItem(key, JSON.stringify(state));
+      update();
+    });
+  });
+  document.getElementById('reset').addEventListener('click',()=>{
+    state={}; localStorage.removeItem(key);
+    app.querySelectorAll('.item.done').forEach(e=>e.classList.remove('done'));
+    update();
+  });
+  update();
+}
+
+function renderPicker(){
+  let html = `<div class="picker">
+    <div class="school" style="margin-top:24px">${esc(SCHOOL)}</div>
+    <h1>Choisissez la classe</h1>
+    <p class="intro">Liste des fournitures ${esc(YEAR)}. Sélectionnez la classe de votre enfant.</p>
+    <div class="grid">`;
+  DB.classes.forEach(k=>{
+    const t = DB.data[k].packs.reduce((n,p)=>n+p.items.length,0);
+    html += `<a class="chip" href="?class=${encodeURIComponent(k)}">${esc(DB.data[k].display)}<small>${t} articles</small></a>`;
+  });
+  html += `</div></div>`;
+  app.innerHTML = html;
+}
+
+render();
+</script>
+</body>
+</html>
