@@ -59,14 +59,31 @@ header{
 .ring .pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   font-size:13px;font-weight:700;color:var(--ink)}
 
-.intro{font-size:14.5px;color:var(--muted);margin:0 0 22px;max-width:46ch}
+.intro{font-size:14.5px;color:var(--muted);margin:0 0 16px;max-width:46ch}
+
+/* Notice — page shows all packs */
+.notice{display:flex;gap:11px;align-items:flex-start;background:#FFF7E6;
+  border:1px solid #F0DDB0;border-left:4px solid #E0A93B;border-radius:12px;
+  padding:13px 15px;margin:0 0 20px;font-size:14px;line-height:1.5;color:#5B4415}
+.notice .ico{flex:0 0 auto;font-size:16px;line-height:1.4}
+.notice b{color:#3F2F0C}
 
 /* Pack section */
 .pack{background:var(--card);border-radius:16px;box-shadow:var(--shadow);
   margin-bottom:18px;overflow:hidden;border:1px solid rgba(38,35,92,.06)}
 .pack-head{display:flex;align-items:baseline;gap:10px;padding:16px 18px 12px}
 .pack-title{font-family:Fraunces,serif;font-weight:600;font-size:19px;color:var(--ink);margin:0}
-.pack-count{font-size:12.5px;color:var(--muted);margin-left:auto;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pack-count{font-size:12.5px;color:var(--muted);margin-left:auto;white-space:nowrap;
+  font-variant-numeric:tabular-nums;font-weight:600;transition:color .2s}
+
+/* Per-pack progress */
+.pack-bar{height:5px;background:#EDF0F8;overflow:hidden}
+.pack-bar span{display:block;height:100%;width:0;background:var(--ink-soft);
+  border-radius:0 4px 4px 0;transition:width .4s cubic-bezier(.4,0,.2,1),background .25s}
+.pack.complete{border-color:rgba(46,158,107,.4)}
+.pack.complete .pack-bar span{background:var(--ok)}
+.pack.complete .pack-count{color:var(--ok)}
+.pack.complete .pack-title{color:var(--ok)}
 
 /* Item row */
 .item{display:flex;align-items:center;gap:14px;padding:13px 18px;cursor:pointer;
@@ -137,6 +154,14 @@ function render(){
 
   const total = c.packs.reduce((n,p)=>n+p.items.length,0);
 
+  // For the notice: number word + readable list of pack names
+  const NUMWORD = {1:'un',2:'deux',3:'trois',4:'quatre',5:'cinq'};
+  const packCountWord = NUMWORD[c.packs.length] || c.packs.length;
+  const packNames = c.packs.map(p=>p.type);
+  const packListStr = packNames.length>1
+    ? packNames.slice(0,-1).join(', ')+' et '+packNames[packNames.length-1]
+    : packNames[0];
+
   let html = `<header>
     <div class="school">${esc(SCHOOL)}</div>
     <div class="head-row">
@@ -153,12 +178,15 @@ function render(){
     </div>
   </header>
   <p class="intro">Cochez chaque article au fur et à mesure que vous le retrouvez dans le pack de votre enfant.</p>
-  <div class="done-banner" id="banner">✓ &nbsp;Pack complet — tous les articles sont présents.</div>`;
+  <div class="notice"><span class="ico">ℹ️</span><span>Cette page affiche les <b>${packCountWord} packs</b> (${packListStr}).
+    Si vous n'avez pas commandé les trois, <b>vérifiez uniquement le ou les packs que vous avez achetés</b> et ignorez les autres.</span></div>
+  <div class="done-banner" id="banner">✓ &nbsp;Les trois packs sont complets — tous les articles sont présents.</div>`;
 
   c.packs.forEach((p,pi)=>{
-    html += `<section class="pack"><div class="pack-head">
+    html += `<section class="pack" data-pack="${pi}"><div class="pack-head">
       <h2 class="pack-title">${esc(p.title||p.type)}</h2>
-      <span class="pack-count">${p.items.length} article${p.items.length>1?'s':''}</span></div>`;
+      <span class="pack-count" id="pc-${pi}">0 / ${p.items.length}</span></div>
+      <div class="pack-bar"><span id="pb-${pi}"></span></div>`;
     p.items.forEach((it,ii)=>{
       const id = pi+'-'+ii;
       const done = state[id] ? ' done':'';
@@ -191,6 +219,17 @@ function render(){
     document.getElementById('pct').textContent = pct+'%';
     document.getElementById('ringfg').style.strokeDashoffset = CIRC*(1-pct/100);
     document.getElementById('banner').classList.toggle('show', checked===total && total>0);
+
+    // per-pack progress
+    c.packs.forEach((p,pi)=>{
+      let n=0;
+      p.items.forEach((it,ii)=>{ if(state[pi+'-'+ii]) n++; });
+      const tot=p.items.length;
+      const full = tot>0 && n===tot;
+      document.getElementById('pb-'+pi).style.width = (tot? n/tot*100 : 0)+'%';
+      document.getElementById('pc-'+pi).textContent = full ? '✓ Pack complet' : n+' / '+tot;
+      app.querySelector('.pack[data-pack="'+pi+'"]').classList.toggle('complete', full);
+    });
   }
   app.querySelectorAll('.item').forEach(el=>{
     el.addEventListener('click',()=>{
